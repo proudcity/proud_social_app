@@ -3,8 +3,7 @@
 angular.module('socialApp', [
   'iso.directives',
   'ngResource',
-  'ngSanitize',
-  'readMore'
+  'ngSanitize'
 ])
 
 .run(
@@ -97,14 +96,6 @@ angular.module('socialApp', [
 
   var userFeed = SocialFeed.getUser(citySocial);
 
-  // Make html OK 
-  var toSafeText = function(data) { 
-    _.map(data, function(item, key) {
-       data[key]['body'] = $sce.trustAsHtml($filter('parseUrlFilter')(item.text, '_blank', item.service));
-    });
-    return data;
-  }
-
   // Toggle social source
   $scope.switchService = function(service, event, limit, callback) {
     if(event) {
@@ -138,7 +129,6 @@ angular.module('socialApp', [
           });
           $scope.services = services;
         }
-        toSafeText(data);
         // Set data
         $scope.social = $scope.preSort 
                       ? _.chain(data).sortBy('date').reverse().value()
@@ -160,12 +150,6 @@ angular.module('socialApp', [
 
   $scope.recent = function() {
     $scope.container.isotope({sortBy : 'date'});
-  }
-
-  $scope.reFlow = function() {
-    setTimeout(function() {
-      $scope.$emit('iso-method', {name:'reLayout', params:null});
-    }, 0);
   }
 
   $scope.shuffle = function() {
@@ -191,7 +175,12 @@ angular.module('socialApp', [
     }
   }
 
+  $scope.toSafe = function(text, service) {
+    return $sce.trustAsHtml($filter('parseUrlFilter')(text, '_blank', service));
+  }
+
 }])
+
 
 // Isotope social wall
 .directive('socialWall', function factory($window, $browser, $http, $timeout) {
@@ -200,7 +189,7 @@ angular.module('socialApp', [
     controller: "SocialController",
     templateUrl: 'views/apps/socialApp/social.html',
     link: {
-      pre: function preLink($scope, $element, $attributes) {
+      pre: function postLink($scope, $element, $attributes) {
         // Init vars
         $scope.socialPostCount = $scope.socialPostCount || 20;
         $scope.socialShowControls = $scope.socialHideControls || false;

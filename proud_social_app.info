@@ -1,0 +1,5 @@
+name = Proud Social App
+description = Creates an angular application to display a social feed, wall, or timeline.
+core = 7.x
+package = Proud
+dependencies[] = proud_aggregator

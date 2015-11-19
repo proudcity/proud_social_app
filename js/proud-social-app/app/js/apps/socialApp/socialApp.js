@@ -97,10 +97,7 @@ angular.module('socialApp', [
   var userFeed = SocialFeed.getUser(citySocial);
 
   // Toggle social source
-  $scope.switchService = function(service, event, limit, callback) {
-    if(event) {
-      event.preventDefault();
-    }
+  $scope.switchService = function(service, limit, callback) {
     var isActive = $scope.isServiceActive(service),
         runQuery = false,
         callback = callback || function() {};
@@ -188,47 +185,44 @@ angular.module('socialApp', [
     restrict: 'A',
     controller: "SocialController",
     templateUrl: 'views/apps/socialApp/social.html',
-    link: {
-      pre: function postLink($scope, $element, $attributes) {
-        // Init vars
-        $scope.socialPostCount = $scope.socialPostCount || 20;
-        $scope.socialShowControls = $scope.socialHideControls || false;
-        $scope.preSort = true;
+    link: function($scope, $element, $attributes) {
+      // Init vars
+      $scope.socialPostCount = $scope.socialPostCount || 20;
+      $scope.socialShowControls = $scope.socialHideControls || false;
+      $scope.preSort = true;
 
-        // call init
-        if(!$scope.inited) {
-          $scope.switchService(null, null, $scope.socialPostCount);
-        }
-
-        // Grab container jquery ref
-        $scope.container = $element.children('[isotope-container]');
-      },
-      post: function postLink($scope, $element, $attributes) {
-        // Watch social
-        $scope.$watch('social', function(value) {
-          if(!$scope.inited) {
-            $scope.container.isotope({
-              getSortData : {
-                date: function($elem) {
-                  return $elem.data('date');
-                }
-              }
-            });
-          }
-          if($scope.social) {
-            $timeout(function() {
-              var imgLoad = $element.waitForImages();
-              imgLoad.done(function() {
-                
-                //$scope.$emit('iso-option', {sortBy : 'date'});
-                $scope.container.isotope({sortBy : 'date', sortAscending: false});
-                // $scope.refreshIso();
-                // 
-              });
-            }, 0);
-          }
-        });
+      // call init
+      if(!$scope.inited) {
+        $scope.switchService(null, $scope.socialPostCount);
       }
+
+      // Grab container jquery ref
+      $scope.container = $element.children('[isotope-container]');
+
+      // Watch social
+      $scope.$watch('social', function(value) {
+        if(!$scope.inited) {
+          $scope.container.isotope({
+            getSortData : {
+              date: function($elem) {
+                return $elem.data('date');
+              }
+            }
+          });
+        }
+        if($scope.social) {
+          $timeout(function() {
+            var imgLoad = imagesLoaded($element);
+            imgLoad.on('always', function( instance ) {
+              
+              //$scope.$emit('iso-option', {sortBy : 'date'});
+              $scope.container.isotope({sortBy : 'date', sortAscending: false});
+              // $scope.refreshIso();
+              // 
+            });
+          }, 0);
+        }
+      });
     }
   }
 })
@@ -242,7 +236,7 @@ angular.module('socialApp', [
     templateUrl: 'views/apps/socialApp/social-timeline.html',
     compile: function(tElem, tAttrs) {
       return {
-        pre: function preLink ($scope, $element, $attributes) {
+        pre: function($scope, $element, $attributes) {
           // Init vars
           $scope.socialPostCount = $scope.socialPostCount || 20;
           $scope.socialShowControls = $scope.socialHideControls || false;
@@ -250,16 +244,16 @@ angular.module('socialApp', [
 
           // so we can switch right/left ordering on tab change
           $scope.oddEvenSwitch = 0;
-          $scope.timelineSwitchService = function(service, event) {
+          $scope.timelineSwitchService = function(service) {
             
-            $scope.switchService(service, event, $scope.socialPostCount, function() {
+            $scope.switchService(service, $scope.socialPostCount, function() {
               $scope.oddEvenSwitch = $scope.oddEvenSwitch ? 0 : 1;
             });
           }
 
           // call init
           if(!$scope.inited) {
-            $scope.switchService(null, null, $scope.socialPostCount);
+            $scope.switchService(null, $scope.socialPostCount);
           }
         }
       }

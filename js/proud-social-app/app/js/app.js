@@ -7,7 +7,6 @@
 //***************************************
 
 angular.module('socialAppParent', [
-  'socialApp',
-  'angular-lazycompile',
-  'angular-inview'
-]);
+  'socialApp'
+])
+
